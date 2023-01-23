@@ -1,5 +1,6 @@
 class PlaysController < ApplicationController
   before_action :set_play, only: %i[show edit update destroy]
+  before_action :authenticate_user!, only: %i[new edit]
 
   def index
     return @plays = Play.all.order('created_at DESC') if params[:category].blank?
@@ -11,7 +12,13 @@ class PlaysController < ApplicationController
     @plays = Play.where(category_id: @category_id.id).order('created_at DESC')
   end
 
-  def show; end
+  def show
+    if @play.reviews.blank?
+      @average_review = 0
+    else
+      @average_review = @play.reviews.average(:rating).round(2)
+    end
+  end
 
   def edit 
     @categories = Category.all.map{ |c| [c.name, c.id] }
